@@ -119,11 +119,9 @@ class SeedDataset(Dataset):
 
     def _augment(self, img):
         """Training augmentation matching assignment spec."""
-        # Random horizontal / vertical flip
+        # Random horizontal flip
         if random.random() > 0.5:
             img = TF.hflip(img)
-        if random.random() > 0.5:
-            img = TF.vflip(img)
         # Rotation ±30°
         angle = random.uniform(-30, 30)
         img = TF.rotate(img, angle)

@@ -2,9 +2,9 @@
 train.py — Training script for Task 1 CNN seed counting.
 
 Runs the following experiments in sequence:
-  1. Model A + Adam  (regression, 30+ epochs, early stopping)
-  2. Model A + SGD   (regression, same spec) — optimizer comparison
-  3. Model B + winner optimizer (regression)
+  1. Model A + Adam  (classification, 30+ epochs, early stopping)
+  2. Model A + SGD   (classification, same spec) — optimizer comparison
+  3. Model B + winner optimizer (classification)
 
 All results are logged to CSV and plots are saved automatically.
 Run:  python train.py
@@ -96,7 +96,7 @@ def get_loss_fn():
     if MODE == 'regression':
         return nn.MSELoss()
     else:
-        return nn.CrossEntropyLoss()
+        return nn.NLLLoss() # nn.CrossEntropyLoss() = nn.LogSoftmax() + nn.NLLLoss()
 
 def preds_to_counts(outputs, mode):
     """Convert raw model output to predicted seed count."""
@@ -378,7 +378,7 @@ if __name__ == '__main__':
         plot_predictions(model_a_sgd, tl_a2, 'ModelA_SGD', MODE)
 
     # Pick best optimizer
-    best_opt = 'adam' if res_a_adam['test_mae'] <= res_a_sgd['test_mae'] else 'sgd'
+    best_opt = 'adam' if res_a_adam['best_val_loss'] <= res_a_sgd['best_val_loss'] else 'sgd'
     print(f"\nBest optimizer for Model B: {best_opt}")
 
     # Experiment 3: Model B + best optimizer

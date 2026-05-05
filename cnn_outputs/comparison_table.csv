@@ -1,6 +1,6 @@
-Method,MAE,RMSE,Acc%,Failure Fixed
-Clustering (A2),25.05,42.0,56.0,reference
-Edge Detection (A3),43.2,64.23,12.8,1 / 62 (1.9%)
-CNN Model A (Adam),5.18,5.79,68.2,14 / 62 (22.6%)
-CNN Model A (SGD),11.86,12.05,27.3,6 / 62 (9.7%)
-CNN Model B,9.73,11.94,36.4,7 / 62 (11.3%)
+label,test_mae,test_rmse,accuracy,epochs_run,best_val_loss,weights
+Clustering_A2,25.05,42.0,56.0,N/A,N/A,N/A
+EdgeDetection_A3,43.2,64.23,12.8,N/A,N/A,N/A
+ModelA_Adam,7.73,10.22,59.1,28,1.6937,E:\CV\Assignment5\cnn_outputs\weights\ModelA_Adam_best.pt
+ModelA_SGD,20.0,28.12,31.8,50,2.4894,E:\CV\Assignment5\cnn_outputs\weights\ModelA_SGD_best.pt
+ModelB_ADAM,5.45,7.39,63.6,37,1.1308,E:\CV\Assignment5\cnn_outputs\weights\ModelB_ADAM_best.pt

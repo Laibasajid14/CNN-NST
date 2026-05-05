@@ -73,7 +73,7 @@ class ModelA(nn.Module):
         if mode == 'regression':
             self.head = nn.Linear(128, 1)
         else:
-            self.head = nn.Linear(128, num_classes)
+            self.head = nn.Sequential(nn.Linear(128, num_classes), nn.Softmax(dim=1))
 
     def forward(self, x):
         x = self.block1(x)
@@ -81,7 +81,10 @@ class ModelA(nn.Module):
         x = self.block3(x)
         x = self.gap(x).flatten(1)
         x = F.relu(self.fc1(x))
-        return self.head(x)
+        if self.mode == 'classification':
+            return torch.log(self.head(x))
+        else:
+            return self.head(x)
 
     def count_params(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -114,7 +117,7 @@ class ModelB(nn.Module):
         if mode == 'regression':
             self.head = nn.Linear(128, 1)
         else:
-            self.head = nn.Linear(128, num_classes)
+            self.head = nn.Sequential(nn.Linear(128, num_classes), nn.Softmax(dim=1))
 
     def forward(self, x):
         x = self.block1(x)
@@ -125,7 +128,10 @@ class ModelB(nn.Module):
         x = self.gap(x).flatten(1)
         x = self.drop(F.relu(self.fc1(x)))
         x = F.relu(self.fc2(x))
-        return self.head(x)
+        if self.mode == 'classification':
+            return torch.log(self.head(x))
+        else:
+            return self.head(x)
 
     def count_params(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
