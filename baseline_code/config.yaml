@@ -1,0 +1,28 @@
+# AgriTech Quality Control System - Assignment 2 Configuration
+
+paths:
+  raw_data: "data/seeds"
+  ground_truth: "data/ground_truth/counts.csv"
+  outputs: "outputs"
+
+preprocessing:
+  noise_reduction_method: "median"
+  kernel_size: 5
+  edge_method: "canny"
+
+thresholding:
+  adaptive_block_size: 11
+  adaptive_c: 2
+
+morphology:
+  kernel_size: 3
+  opening_iterations: 1
+  closing_iterations: 1
+
+clustering:
+  kmeans_k: 2
+
+counting:
+  min_seed_area: 800      
+  max_seed_area: 15000    
+  circularity_threshold: 0.25  
