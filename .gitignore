@@ -114,9 +114,9 @@ dmypy.json
 Task_2/matting_data/
 Task_1/data/seeds/
 intermediate_outputs/
-cnn_outputs/
+# cnn_outputs/
 edge_outputs/
-logs/
+# logs/
 
 # IDE
 .vscode/
