@@ -48,7 +48,8 @@ IMG_SIZE   = cfg['nst']['img_size']           # 256
 N_STEPS    = cfg['nst']['n_steps']            # 150
 STYLE_W    = cfg['nst']['style_weight']       # default 1e5
 CONTENT_W  = cfg['nst']['content_weight']     # 1.0
-OUTPUT_DIR = Path(cfg['paths']['task2_outputs'])
+ROOT = Path(__file__).parent
+OUTPUT_DIR = (ROOT / cfg['paths']['task2_outputs']).resolve()
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -172,14 +173,16 @@ def run_nst(content_img, style_img, style_weight=STYLE_W,
     else:
         gen = content_img.clone().requires_grad_(True)
 
-    optimizer = optim.LBFGS([gen], max_iter=20, tolerance_grad=1e-5)
+    optimizer = optim.Adam([gen], lr=0.02)
 
     step = [0]
     losses = []
 
-    def closure():
-        gen.data.clamp_(0, 1)
+    # Run optimization with Adam
+    for opt_step in range(n_steps):
         optimizer.zero_grad()
+
+        gen.data.clamp_(0, 1)
         gen_feats = extractor(gen)
 
         # Content loss
@@ -194,6 +197,7 @@ def run_nst(content_img, style_img, style_weight=STYLE_W,
 
         total_loss = content_weight * content_loss + style_weight * style_loss
         total_loss.backward()
+        optimizer.step()
 
         step[0] += 1
         if step[0] % 50 == 0:
@@ -201,12 +205,6 @@ def run_nst(content_img, style_img, style_weight=STYLE_W,
             print(f"  Step {step[0]:4d} | loss {total_loss.item():.2f} | "
                   f"content {content_loss.item():.4f} | "
                   f"style {style_loss.item():.4f}")
-        return total_loss
-
-    # Run optimization in L-BFGS cycles
-    cycles = max(1, n_steps // 20)
-    for _ in range(cycles):
-        optimizer.step(closure)
 
     gen.data.clamp_(0, 1)
     return gen.detach()

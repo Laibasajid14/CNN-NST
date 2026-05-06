@@ -60,11 +60,14 @@ N_TRAIN     = cfg['matting']['n_train']        # 2500
 N_VAL       = cfg['matting']['n_val']          # 300
 N_TEST      = cfg['matting']['n_test']         # 300
 
-DATASET_ROOT = Path(cfg['paths']['aisegment_root'])
-WEIGHTS_OUT  = Path(cfg['paths']['matting_weights'])
-PLOTS_OUT    = Path(cfg['paths']['matting_plots'])
+ROOT = Path(__file__).parent.parent
+DATASET_ROOT = (ROOT / cfg['paths']['aisegment_root']).resolve()
+WEIGHTS_OUT  = (ROOT / cfg['paths']['matting_weights']).resolve()
+PLOTS_OUT    = (ROOT / cfg['paths']['matting_plots']).resolve()
+OUTPUT_DIR   = (ROOT / cfg['paths']['task2_outputs']).resolve()
 WEIGHTS_OUT.mkdir(parents=True, exist_ok=True)
 PLOTS_OUT.mkdir(parents=True, exist_ok=True)
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 random.seed(SEED)
 np.random.seed(SEED)
@@ -84,18 +87,40 @@ def find_pairs(root, max_pairs=None):
     for session in sorted(clip_root.iterdir()):
         if not session.is_dir():
             continue
-        for sub in sorted(session.iterdir()):
-            if not sub.is_dir():
+        mat_session = matting_root / session.name
+        if not mat_session.exists():
+            continue
+
+        for clip_sub in sorted(session.iterdir()):
+            if not clip_sub.is_dir():
                 continue
-            for img_file in sorted(sub.glob('*.jpg')):
-                # Build corresponding matte path
-                rel        = img_file.relative_to(clip_root)
-                matte_path = matting_root / rel.parent / (img_file.stem + '.png')
+            for img_file in sorted(clip_sub.glob('*.jpg')):
+                alpha_name = img_file.stem + '.png'
+
+                # Try exact matching subfolder name first.
+                matte_path = mat_session / clip_sub.name / alpha_name
+
+                # Fallback if matting folder uses a mirrored prefix like matting_000000xx.
+                if not matte_path.exists() and clip_sub.name.startswith('clip_'):
+                    alt_sub = 'matting_' + clip_sub.name[len('clip_'):]
+                    matte_path = mat_session / alt_sub / alpha_name
+
+                # Last resort: scan all subfolders in the session for the alpha file.
+                if not matte_path.exists():
+                    for mat_sub in sorted(mat_session.iterdir()):
+                        if not mat_sub.is_dir():
+                            continue
+                        candidate = mat_sub / alpha_name
+                        if candidate.exists():
+                            matte_path = candidate
+                            break
+
                 if matte_path.exists():
                     pairs.append((img_file, matte_path))
-            if max_pairs and len(pairs) >= max_pairs * 2:
+
+            if max_pairs and len(pairs) >= max_pairs:
                 break
-        if max_pairs and len(pairs) >= max_pairs * 2:
+        if max_pairs and len(pairs) >= max_pairs:
             break
 
     random.shuffle(pairs)
@@ -318,10 +343,10 @@ def train():
 
     plt.suptitle(f'Matting Visualization — Test IoU: {test_iou:.4f}')
     plt.tight_layout()
-    plt.savefig(str(PLOTS_OUT / 'matting_overlay.png').replace(
-        str(PLOTS_OUT), str(Path(cfg['paths']['task2_outputs']))), dpi=150)
+    overlay_out = OUTPUT_DIR / 'matting_overlay.png'
+    plt.savefig(overlay_out, dpi=150)
     plt.close()
-    print(f"Saved matting_overlay.png")
+    print(f"Saved matting_overlay.png → {overlay_out}")
 
     return test_iou
 

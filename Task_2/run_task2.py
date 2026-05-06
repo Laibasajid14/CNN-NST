@@ -21,14 +21,15 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from matting.train   import train  as train_matting
 from video_pipeline  import run_pipeline, extract_content_frames
-from nst             import (run_beta_alpha_ablation, run_layer_ablation,
-                              visualize_feature_maps)
+from nst             import (run_grid, run_beta_alpha_ablation,
+                              run_layer_ablation, visualize_feature_maps)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--video',       required=True, help='Path to your input video')
-    parser.add_argument('--style',       required=True, help='Path to style artwork image')
+    parser.add_argument('--style',       required=True,
+                        help='Path to a style image or style directory')
     parser.add_argument('--skip_train',  action='store_true',
                         help='Skip matting training (use if weights already exist)')
     parser.add_argument('--variant',     default='all',
@@ -38,7 +39,16 @@ def main():
     video_path = Path(args.video)
     style_path = Path(args.style)
     assert video_path.exists(), f"Video not found: {video_path}"
-    assert style_path.exists(), f"Style not found: {style_path}"
+    assert style_path.exists(), f"Style path not found: {style_path}"
+
+    if style_path.is_dir():
+        style_paths = sorted([p for p in style_path.iterdir()
+                              if p.suffix.lower() in ['.jpg', '.jpeg', '.png']])
+        assert style_paths, f"No style images found in directory: {style_path}"
+        style_for_video = style_paths[0]
+    else:
+        style_paths = [style_path]
+        style_for_video = style_path
 
     print("\n" + "="*60)
     print("TASK 2 PIPELINE — Assignment 5")
@@ -61,11 +71,17 @@ def main():
     if content_frames:
         sample_content = content_frames[len(content_frames) // 2]
 
-        print("\n[Step 3a] Running β/α ablation...")
-        run_beta_alpha_ablation(sample_content, str(style_path))
+        if len(style_paths) >= 3:
+            print("\n[Step 3] Generating NST style grid (5×3)...")
+            run_grid(content_frames, style_paths[:3])
+        else:
+            print("\n[Step 3] Skipping 5×3 style grid because fewer than 3 style images were provided.")
 
-        print("\n[Step 3b] Running layer ablation...")
-        run_layer_ablation(sample_content, str(style_path))
+        print("\n[Step 4] Running β/α ablation...")
+        run_beta_alpha_ablation(sample_content, str(style_for_video))
+
+        print("\n[Step 5] Running layer ablation...")
+        run_layer_ablation(sample_content, str(style_for_video))
 
     # ── Step 4: Feature map visualization ────────────────────────────────────
     if content_frames:
@@ -74,7 +90,7 @@ def main():
 
     # ── Step 5: Full video pipeline ───────────────────────────────────────────
     print(f"\n[Step 5] Running full video pipeline (variant={args.variant})...")
-    run_pipeline(str(video_path), str(style_path), variant=args.variant)
+    run_pipeline(str(video_path), str(style_for_video), variant=args.variant)
 
     print("\n" + "="*60)
     print("Task 2 complete. Outputs in task2_outputs/")

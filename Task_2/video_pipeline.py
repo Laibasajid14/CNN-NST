@@ -35,12 +35,13 @@ CONFIG_PATH = Path(__file__).parent / 'config_task2.yaml'
 with open(CONFIG_PATH) as f:
     cfg = yaml.safe_load(f)
 
+ROOT = Path(__file__).parent
 TARGET_FPS = cfg['video']['target_fps']        # 5-8 FPS for CPU feasibility
 FRAME_SIZE = cfg['video']['frame_size']        # 256
 NST_STEPS  = cfg['nst']['n_steps']            # 150
 STYLE_W    = cfg['nst']['style_weight']
-MATTING_WEIGHTS = Path(cfg['paths']['matting_weights']) / 'matting_best.pt'
-OUTPUT_DIR      = Path(cfg['paths']['task2_outputs'])
+MATTING_WEIGHTS = (ROOT / cfg['paths']['matting_weights'] / 'matting_best.pt').resolve()
+OUTPUT_DIR      = (ROOT / cfg['paths']['task2_outputs']).resolve()
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -60,9 +61,9 @@ def frame_to_tensor(frame_bgr, size=FRAME_SIZE):
 
 
 def tensor_to_bgr(t):
-    """(1,3,H,W) normalized tensor → BGR uint8 numpy."""
-    t   = t.squeeze(0).cpu()
-    t   = (t * DENORM_STD + DENORM_MEAN).clamp(0, 1)
+    """(1,3,H,W) image tensor in [0,1] → BGR uint8 numpy."""
+    t = t.squeeze(0).cpu()
+    t = t.clamp(0, 1)
     rgb = (t.permute(1, 2, 0).numpy() * 255).astype(np.uint8)
     return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
 
@@ -205,8 +206,7 @@ def run_pipeline(video_path, style_path, variant='all'):
         prev_stylized = result_t.clone()
 
         # Convert stylized tensor to BGR
-        stylized_bgr = tensor_to_bgr(
-            result_t * DENORM_STD.to(DEVICE).unsqueeze(0) + DENORM_MEAN.to(DEVICE).unsqueeze(0))
+        stylized_bgr = tensor_to_bgr(result_t)
         stylized_bgr = cv2.resize(stylized_bgr, (FRAME_SIZE, FRAME_SIZE))
 
         # 4d. Composite

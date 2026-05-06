@@ -1,107 +1,178 @@
-# Assignment 5 — Deep Learning for Computer Vision
-## Neural Style Transfer Video
-
----
+# Assignment 5 — Task 2: Neural Style Transfer Video
 
 ## Overview
 
-This assignment has two independent tasks:
+This Task 2 project trains a U-Net human matting model on the AISegment dataset and uses Gatys-style Neural Style Transfer (NST) to produce stylized video variants:
 
-| Task | What it does |
-| **Task 2** | Neural Style Transfer video pipeline — trains a U-Net matting model on AISegment portraits, then applies Gatys-style NST to a video with selective compositing |
+- **background stylized** (subject natural)
+- **subject stylized** (background natural)
+- **full frame stylized** (baseline)
 
----
-
-## What Video Do You Need for Task 2?
-
-**Record or use any short video (10–30 seconds) where a person is the main subject**, filmed against any background. Ideal characteristics:
-
-- A person walking slowly, standing, or doing a simple activity (reading, writing, etc.)
-- Filmed from a fixed camera position (reduces background complexity)
-- Indoor or outdoor — both work
-- 1080p or 720p (the pipeline downsamples to 256×256 anyway)
-- MP4 format preferred
-
-**What the video is used for:**
-The matting model segments the person from the background. Then NST applies an artwork style either to just the background (person stays natural), just the person (background stays natural), or the whole frame. The final output is a stylized video.
-
-**Example:** Film yourself at your desk for 15 seconds. That is enough.
+The pipeline is designed to run on CPU, with reduced frame rate and 256×256 processing.
 
 ---
 
-## What Is the Public Domain Artwork (Style Image)?
+## Contents
 
-You need **1–3 style images** — these are the artworks whose visual style is transferred onto your video frames. They must be **public domain** so there are no copyright issues.
-
-**Recommended sources:**
-
-| Artwork | Artist | Where to get it |
-|---|---|---|
-| The Starry Night | Van Gogh | [WikiArt](https://www.wikiart.org/en/vincent-van-gogh/the-starry-night-1889) |
-| The Great Wave | Hokusai | [Wikipedia Commons](https://commons.wikimedia.org/wiki/File:The_Great_Wave_off_Kanagawa.jpg) |
-| Composition VIII | Kandinsky | [WikiArt](https://www.wikiart.org/en/wassily-kandinsky/composition-viii-1923) |
-| The Persistence of Memory | Dalí | Public domain in many countries |
-| Mosaic / Byzantine patterns | Various | [Wikipedia Commons](https://commons.wikimedia.org/wiki/Category:Byzantine_mosaics) |
-
-**Download any one painting as a JPG and save it to `task2_nst_video/style/`.**
-
-The assignment requires:
-- At minimum 1 style applied to the video
-- β/α weight ablation (3 different style strengths on a single frame)
-- Layer ablation (shallow vs deep VGG layers)
-- Feature map visualization comparing video frames vs seed images
+- `config_task2.yaml` — dataset, matting, NST, and video settings
+- `matting/model.py` — lightweight U-Net alpha matting architecture
+- `matting/train.py` — AISegment training pipeline
+- `nst.py` — Neural Style Transfer implementation with Gram matrices
+- `video_pipeline.py` — frame extraction, matting, compositing, encoding
+- `content/` — your input video and auto-extracted frames
+- `style/` — public domain artwork images
+- `task2_outputs/` — generated outputs, weights, and plots
 
 ---
 
-## Project Directory Structure
+## A — Setup (Conda / CPU)
 
-```
-Task_2/
-│
-│
-├── data/
-│   └── aisegment/                     # AISegment dataset (Task 2)
-│       ├── clip_img/
-│       │   └── <session>/<sub>/*.jpg
-│       └── matting/
-│           └── <session>/<sub>/*.png
-│
-├── task2_nst_video/
-│   ├── config_task2.yaml              # Matting + NST + video settings
-│   ├── run_task2.py                   # Master script — runs everything
-│   ├── nst.py                         # NST core (VGG19, Gram matrix, ablations)
-│   ├── video_pipeline.py             # Frame extraction + compositing + encoding
-│   ├── matting/
-│   │   ├── model.py                   # U-Net architecture
-│   │   └── train.py                   # Training on AISegment
-│   ├── content/                       # ← Put extracted video frames here
-│   │   └── frame_001.jpg  ...
-│   └── style/                         # ← Put your artwork images here
-│       └── vangogh_starry_night.jpg
-│
-│
-└── task2_outputs/                     # Created automatically by Task 2
-    ├── matting_weights/
-    │   └── matting_best.pt
-    ├── matting_plots/
-    │   └── matting_curves.png
-    ├── content/                       # Auto-extracted video frames
-    ├── beta_alpha_ablation.png
-    ├── layer_ablation.png
-    ├── feature_maps.png
-    ├── grid.png
-    ├── stylized_background_vangogh.mp4
-    ├── stylized_subject_vangogh.mp4
-    ├── stylized_full_vangogh.mp4
-    ├── branded_poster.png
-    └── matting_overlay.png
+### Create the environment
+
+```bash
+conda create -n assignment5 python=3.11 -y
+conda activate assignment5
 ```
 
+### Install required Python packages
+
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+pip install opencv-python pyyaml matplotlib pillow
+```
+
+> If the above PyTorch command fails, use the latest CPU package line from https://pytorch.org/.
+
 ---
 
-## Setup
+## B — Dataset Setup
 
-### 1. Install dependencies
+### Download AISegment dataset
+
+Download the AISegment human matting subset from Kaggle or your source.
+
+### Place the dataset in the repository
+
+The code expects:
+
+- `Task_2/data/clip_img/`
+- `Task_2/data/matting/`
+
+Each folder should contain the AISegment session directories, e.g.:
+
+- `Task_2/data/clip_img/1803151818/.../*.jpg`
+- `Task_2/data/matting/1803151818/.../*.png`
+
+If your dataset archive contains `clip_img/` and `matting/`, place them directly under `Task_2/data/`.
+
+---
+
+## C — Folder Preparation
+
+### Video input
+
+Put your recorded video anywhere, for example:
+
+- `Task_2/content/my_video.mp4`
+
+This video is used for NST and compositing only. It is **not** used for matting training.
+
+### Style images
+
+Place one or more public-domain style images in:
+
+- `Task_2/style/`
+
+Example:
+
+- `Task_2/style/vangogh.jpg`
+
+---
+
+## D — Run Instructions
+
+### 1. Train the matting model
+
+```bash
+cd e:\CV\Assignment5\Task_2
+python matting/train.py
+```
+
+This trains the U-Net on the AISegment subset and saves the best weights to:
+
+- `Task_2/task2_outputs/matting_weights/matting_best.pt`
+
+It also writes:
+
+- `Task_2/task2_outputs/matting_plots/matting_curves.png`
+- `Task_2/task2_outputs/matting_overlay.png`
+
+### 2. Run the full pipeline
+
+```bash
+cd e:\CV\Assignment5\Task_2
+python run_task2.py --video content/my_video.mp4 --style style/vangogh.jpg
+```
+
+If you have multiple style images in `Task_2/style/`, pass the folder instead:
+
+```bash
+python run_task2.py --video content/my_video.mp4 --style style/
+```
+
+If matting is already trained, skip training with:
+
+```bash
+python run_task2.py --video content/my_video.mp4 --style style/vangogh.jpg --skip_train
+```
+
+### 3. Run individual components
+
+```bash
+cd e:\CV\Assignment5\Task_2
+python nst.py --content content/frame_001.jpg --style style/vangogh.jpg
+python nst.py --ablation --content content/frame_001.jpg --style style/vangogh.jpg
+python nst.py --layer_ablation --content content/frame_001.jpg --style style/vangogh.jpg
+python nst.py --feature_maps --content content/frame_001.jpg --seed_img content/frame_002.jpg
+python video_pipeline.py --video content/my_video.mp4 --style style/vangogh.jpg --extract_frames
+python video_pipeline.py --video content/my_video.mp4 --style style/vangogh.jpg --variant background
+```
+
+---
+
+## E — Expected Outputs
+
+The pipeline writes outputs into `Task_2/task2_outputs/`.
+
+Generated files:
+
+- `matting_weights/matting_best.pt`
+- `matting_plots/matting_curves.png`
+- `matting_overlay.png`
+- `content/frame_001.jpg`, ..., `content/frame_005.jpg`
+- `beta_alpha_ablation.png`
+- `layer_ablation.png`
+- `feature_maps.png`
+- `grid.png`
+- `stylized_background_<style>.mp4`
+- `stylized_subject_<style>.mp4`
+- `stylized_full_<style>.mp4`
+- `branded_poster.png`
+
+---
+
+## Notes
+
+- The video is used only for testing/compositing, not for training.
+- The AISegment dataset is used only by `matting/train.py`.
+- All code falls back to CPU automatically when CUDA is unavailable.
+- The model saves `matting_best.pt` for later reuse.
+
+## Troubleshooting
+
+- If the video is not found, verify the `--video` path is correct relative to `Task_2/`.
+- If style image is not found, verify the `--style` path is correct.
+- If video codec issues occur, convert the output MP4 with `ffmpeg`.
 
 
 ---

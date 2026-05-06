@@ -4,13 +4,13 @@
 matting:
   seed: 42
   img_size: 256
-  batch_size: 8
+  batch_size: 16
   max_epochs: 20
   patience: 5
   lr: 0.001
-  n_train: 2500
-  n_val: 300
-  n_test: 300
+  n_train: 5000
+  n_val: 500
+  n_test: 500
 
 nst:
   img_size: 256
@@ -24,7 +24,7 @@ video:
   max_frames: 150       # Safety cap
 
 paths:
-  aisegment_root:   "../../data/aisegment"       # AISegment dataset root
-  matting_weights:  "../../task2_outputs/matting_weights"
-  matting_plots:    "../../task2_outputs/matting_plots"
-  task2_outputs:    "../../task2_outputs"
+  aisegment_root:   "./data"                       # AISegment dataset root (contains clip_img/ and matting/)
+  matting_weights:  "./task2_outputs/matting_weights"
+  matting_plots:    "./task2_outputs/matting_plots"
+  task2_outputs:    "./task2_outputs"
