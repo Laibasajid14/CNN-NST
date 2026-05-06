@@ -111,7 +111,7 @@ dmypy.json
 .pyre/
 
 # Project specific
-Task_2/matting_data/
+Task_2/data/
 Task_1/data/seeds/
 intermediate_outputs/
 # cnn_outputs/
