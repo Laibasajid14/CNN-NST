@@ -1,8 +1,0 @@
-epoch,train_loss,val_loss,train_mae,val_mae,lr
-1,nan,nan,nan,nan,1.00e-02
-2,nan,nan,nan,nan,1.00e-02
-3,nan,nan,nan,nan,1.00e-02
-4,nan,nan,nan,nan,5.00e-03
-5,nan,nan,nan,nan,5.00e-03
-6,nan,nan,nan,nan,5.00e-03
-7,nan,nan,nan,nan,5.00e-03

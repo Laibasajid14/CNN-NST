@@ -1,0 +1,39 @@
+{
+  "assignment": "Assignment5",
+  "student_id": "",
+  "submission_date": "2024-05-09",
+  "verification_codes": {
+    "assignment2_baseline_metrics": {
+      "dataset1": {
+        "canny_count": {
+          "mae": 43.198581560283685,
+          "rmse": 64.22859220578938,
+          "accuracy": 12.76595744680851
+        },
+        "sobel_count": {
+          "mae": 65.50354609929079,
+          "rmse": 77.65490124868657,
+          "accuracy": 0.0
+        },
+        "baseline_count": {
+          "mae": 25.04964539007092,
+          "rmse": 42.00303940370192,
+          "accuracy": 56.02836879432624
+        }
+      }
+    },
+    "assignment3_edge_metrics": {
+      "dataset2": {
+        "canny_mean_density": 0.07056664140776285,
+        "sobel_mean_density": 0.2056871393319991,
+        "gt_mean_density": 0.061102713065329856,
+        "canny_sensitivity": {
+          "30_90": 69.56028368794327,
+          "50_150": 69.64539007092199,
+          "80_200": 70.19858156028369,
+          "100_250": 70.81560283687944
+        }
+      }
+    }
+  }
+}

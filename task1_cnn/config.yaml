@@ -1,0 +1,48 @@
+# Task 1 CNN Configuration — Assignment 5
+# All hyperparameters recorded here for reproducibility.
+
+training:
+  seed: 42                    # Fixed random seed — all experiments use this
+  img_size: 224               # Input image size (H=W)
+  batch_size: 16              # Small batch for CPU training
+  max_epochs: 50              # Training will early-stop before this
+  patience: 7                 # Early stopping patience (epochs without val improvement)
+  lr_adam: 0.001              # Adam learning rate
+  lr_sgd: 0.001               # SGD learning rate # or even 0.0005
+  momentum: 0.9               # SGD momentum
+  weight_decay: 0.0001        # L2 regularisation (applied to Model B via optimizer)
+  mode: "classification"      # "regression" (MSE) or "classification" (CE, 15 bins)
+  num_classes: 15             # Number of count bins (bin_size=10, range 1-144)
+
+# NOTE on mode:
+#   "regression" is the primary mode — predicts raw count with MSE loss.
+#   This produces MAE/RMSE directly comparable to Assignments 2 & 3.
+#   The assignment spec says Softmax/CE but that requires binning because
+#   counts span 1-144 (144 unique values with only 141 images — too sparse
+#   for per-count classification). Set mode: "classification" to try binning.
+
+model_a:
+  conv_filters: [32, 64, 128]
+  dropout: 0.0
+  fc_size: 128
+
+model_b:
+  conv_filters: [32, 64, 128, 256]
+  dropout: 0.2
+  weight_decay: 0.0001        # Same as training.weight_decay
+  residual: true
+  fc_sizes: [256, 128]
+
+augmentation:
+  rotation_degrees: 30        # ±30°
+  horizontal_flip: true
+  vertical_flip: false
+  brightness: 0.2             # ±20%
+  zoom: 0.05                  # ±10% (implemented as RandomResizedCrop)
+
+paths:
+  # Paths relative to task1_cnn directory; will be converted to absolute
+  filtered_images: "../intermediate_outputs/preprocessed_images/filtered"
+  ground_truth:    "data/ground_truth/counts.csv"
+  failure_cases:   "../intermediate_outputs/metrics/failure_cases.json"
+  cnn_outputs:     "cnn_outputs"

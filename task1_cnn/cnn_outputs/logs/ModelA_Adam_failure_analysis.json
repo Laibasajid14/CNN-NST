@@ -1,0 +1,135 @@
+{
+  "fixed": 11,
+  "total": 62,
+  "pct": 17.7,
+  "details": {
+    "123.jpg": {
+      "actual": 123,
+      "baseline_pred": 47,
+      "cnn_pred": 135,
+      "cnn_fixed": true,
+      "baseline_error": 76,
+      "cnn_error": 10
+    },
+    "35.jpg": {
+      "actual": 35,
+      "baseline_pred": 40,
+      "cnn_pred": 15,
+      "cnn_fixed": false,
+      "baseline_error": 5,
+      "cnn_error": 20
+    },
+    "101.jpg": {
+      "actual": 101,
+      "baseline_pred": 24,
+      "cnn_pred": 105,
+      "cnn_fixed": true,
+      "baseline_error": 77,
+      "cnn_error": 0
+    },
+    "29.jpg": {
+      "actual": 29,
+      "baseline_pred": 32,
+      "cnn_pred": 15,
+      "cnn_fixed": false,
+      "baseline_error": 3,
+      "cnn_error": 10
+    },
+    "24.jpg": {
+      "actual": 24,
+      "baseline_pred": 27,
+      "cnn_pred": 15,
+      "cnn_fixed": false,
+      "baseline_error": 3,
+      "cnn_error": 10
+    },
+    "121.jpg": {
+      "actual": 121,
+      "baseline_pred": 46,
+      "cnn_pred": 115,
+      "cnn_fixed": true,
+      "baseline_error": 75,
+      "cnn_error": 10
+    },
+    "105.jpg": {
+      "actual": 105,
+      "baseline_pred": 23,
+      "cnn_pred": 105,
+      "cnn_fixed": true,
+      "baseline_error": 82,
+      "cnn_error": 0
+    },
+    "106.jpg": {
+      "actual": 106,
+      "baseline_pred": 23,
+      "cnn_pred": 105,
+      "cnn_fixed": true,
+      "baseline_error": 83,
+      "cnn_error": 0
+    },
+    "7.jpg": {
+      "actual": 7,
+      "baseline_pred": 6,
+      "cnn_pred": 5,
+      "cnn_fixed": true,
+      "baseline_error": 1,
+      "cnn_error": 0
+    },
+    "120.jpg": {
+      "actual": 120,
+      "baseline_pred": 45,
+      "cnn_pred": 105,
+      "cnn_fixed": true,
+      "baseline_error": 75,
+      "cnn_error": 10
+    },
+    "124.jpg": {
+      "actual": 124,
+      "baseline_pred": 44,
+      "cnn_pred": 135,
+      "cnn_fixed": true,
+      "baseline_error": 80,
+      "cnn_error": 10
+    },
+    "132.jpg": {
+      "actual": 132,
+      "baseline_pred": 58,
+      "cnn_pred": 135,
+      "cnn_fixed": true,
+      "baseline_error": 74,
+      "cnn_error": 0
+    },
+    "22.jpg": {
+      "actual": 22,
+      "baseline_pred": 28,
+      "cnn_pred": 15,
+      "cnn_fixed": false,
+      "baseline_error": 6,
+      "cnn_error": 10
+    },
+    "27.jpg": {
+      "actual": 27,
+      "baseline_pred": 30,
+      "cnn_pred": 15,
+      "cnn_fixed": false,
+      "baseline_error": 3,
+      "cnn_error": 10
+    },
+    "104.jpg": {
+      "actual": 104,
+      "baseline_pred": 18,
+      "cnn_pred": 105,
+      "cnn_fixed": true,
+      "baseline_error": 86,
+      "cnn_error": 0
+    },
+    "126.jpg": {
+      "actual": 126,
+      "baseline_pred": 45,
+      "cnn_pred": 135,
+      "cnn_fixed": true,
+      "baseline_error": 81,
+      "cnn_error": 10
+    }
+  }
+}

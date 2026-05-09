@@ -111,12 +111,14 @@ dmypy.json
 .pyre/
 
 # Project specific
-Task_2/data/
-Task_1/data/seeds/
+task2_nst_video/data/
+task1_cnn/data/seeds/
 intermediate_outputs/
 # cnn_outputs/
 edge_outputs/
 # logs/
+task2_nst_video/content/
+task2_nst_video/task2_outputs/
 
 # IDE
 .vscode/
