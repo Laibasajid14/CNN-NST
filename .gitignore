@@ -113,7 +113,7 @@ dmypy.json
 # Project specific
 task2_nst_video/data/
 task1_cnn/data/seeds/
-intermediate_outputs/
+# intermediate_outputs/
 # cnn_outputs/
 edge_outputs/
 # logs/
